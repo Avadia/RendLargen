@@ -1,0 +1,16 @@
+{
+  "buycraft-api-key": "",
+  
+  "last-timestamp": 0,
+  "last-uuid": "",
+
+  "sql-url": "",
+  "sql-username": "",
+  "sql-password": "",
+
+  "redis-ip": "",
+  "redis-port": ,
+  "redis-password": "",
+
+  "debug": true
+}
