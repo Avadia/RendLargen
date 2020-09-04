@@ -28,30 +28,26 @@ import java.util.logging.Level;
  * You should have received a copy of the GNU General Public License
  * along with RendLargen.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class BuycraftAPI
-{
+public class BuycraftAPI {
     private final RendLargen rendLargen;
     private final String apiKey;
     private final Gson gson;
 
-    public BuycraftAPI(RendLargen rendLargen, String apiKey)
-    {
+    public BuycraftAPI(RendLargen rendLargen, String apiKey) {
         this.rendLargen = rendLargen;
         this.apiKey = apiKey;
 
         this.gson = new Gson();
     }
 
-    public JsonObject categoriesAction()
-    {
+    public JsonObject categoriesAction() {
         HashMap<String, String> apiCallParams = new HashMap<>();
         apiCallParams.put("action", "categories");
 
         return call(apiCallParams);
     }
 
-    public JsonObject urlAction(String url)
-    {
+    public JsonObject urlAction(String url) {
         HashMap<String, String> apiCallParams = new HashMap<>();
 
         apiCallParams.put("action", "url");
@@ -60,28 +56,25 @@ public class BuycraftAPI
         return call(apiCallParams);
     }
 
-    public JsonObject packagesAction()
-    {
+    public JsonObject packagesAction() {
         HashMap<String, String> apiCallParams = new HashMap<>();
         apiCallParams.put("action", "packages");
 
         return call(apiCallParams);
     }
 
-    public JsonObject paymentsAction(int limit, String username)
-    {
+    public JsonObject paymentsAction(int limit, String username) {
         HashMap<String, String> apiCallParams = new HashMap<>();
         apiCallParams.put("action", "payments");
         apiCallParams.put("limit", String.valueOf(limit));
 
-        if(username != null)
+        if (username != null)
             apiCallParams.put("ign", username);
 
         return call(apiCallParams);
     }
 
-    public JsonObject fetchPendingPlayers()
-    {
+    public JsonObject fetchPendingPlayers() {
         HashMap<String, String> apiCallParams = new HashMap<>();
         apiCallParams.put("action", "pendingUsers");
         apiCallParams.put("userType", "uuid");
@@ -89,15 +82,14 @@ public class BuycraftAPI
         return call(apiCallParams);
     }
 
-    public JsonObject fetchPlayerCommands(String[] players)
-    {
+    public JsonObject fetchPlayerCommands(String[] players) {
         HashMap<String, String> apiCallParams = new HashMap<>();
         apiCallParams.put("action", "commands");
         apiCallParams.put("do", "lookup");
 
         JsonArray usersJson = new JsonArray();
 
-        for(String player : players)
+        for (String player : players)
             usersJson.add(new JsonPrimitive(player));
 
         apiCallParams.put("users", this.gson.toJson(usersJson));
@@ -108,8 +100,7 @@ public class BuycraftAPI
         return call(apiCallParams);
     }
 
-    public void commandsDeleteAction(int[] commands)
-    {
+    public void commandsDeleteAction(int[] commands) {
         HashMap<String, String> apiCallParams = new HashMap<>();
 
         apiCallParams.put("action", "commands");
@@ -117,7 +108,7 @@ public class BuycraftAPI
 
         JsonArray commandsJson = new JsonArray();
 
-        for(int command : commands)
+        for (int command : commands)
             commandsJson.add(new JsonPrimitive(command));
 
         apiCallParams.put("commands", this.gson.toJson(commandsJson));
@@ -125,30 +116,24 @@ public class BuycraftAPI
         call(apiCallParams);
     }
 
-    private JsonObject call(HashMap<String, String> apiCallParams)
-    {
+    private JsonObject call(HashMap<String, String> apiCallParams) {
         apiCallParams.put("secret", this.apiKey);
 
         String url = "https://api.buycraft.net/v4" + this.generateUrlQueryString(apiCallParams);
         String response = this.makeRequest(url);
 
-        try
-        {
+        try {
             if (response != null)
                 return new JsonParser().parse(response).getAsJsonObject();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             this.rendLargen.log(Level.SEVERE, "Exception on parsing Buycraft's json response!");
         }
 
         return null;
     }
 
-    public String makeRequest(String url)
-    {
-        try
-        {
+    public String makeRequest(String url) {
+        try {
             URL urll = new URL(url);
 
             HttpURLConnection httpConnection = (HttpURLConnection) urll.openConnection();
@@ -161,32 +146,28 @@ public class BuycraftAPI
 
             BufferedReader in = new BufferedReader(new InputStreamReader(httpConnection.getInputStream()));
 
-            String content = "";
+            StringBuilder content = new StringBuilder();
             String inputLine;
 
             while ((inputLine = in.readLine()) != null)
-                content = content + inputLine;
+                content.append(inputLine);
 
             in.close();
 
-            return content;
-        }
-        catch (IOException e)
-        {
+            return content.toString();
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
         return null;
     }
 
-    private String generateUrlQueryString(HashMap<String, String> arguments)
-    {
+    private String generateUrlQueryString(HashMap<String, String> arguments) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("?");
 
-        for (Map.Entry<String, String> entry : arguments.entrySet())
-        {
+        for (Map.Entry<String, String> entry : arguments.entrySet()) {
             if (sb.length() > 1)
                 sb.append("&");
 

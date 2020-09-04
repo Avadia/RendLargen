@@ -16,30 +16,25 @@ package net.samagames.rendlargen.utils;
  * You should have received a copy of the GNU General Public License
  * along with RendLargen.  If not, see <http://www.gnu.org/licenses/>.
  */
-public enum ModChannel
-{
+public enum ModChannel {
     DISCUSSION(ChatColor.DARK_AQUA, "Discussion"),
     SANCTION(ChatColor.RED, "Sanction"),
     REPORT(ChatColor.GOLD, "Signalement"),
-    INFORMATION(ChatColor.GREEN, "Information"),
-    ;
+    INFORMATION(ChatColor.GREEN, "Information");
 
     private final ChatColor color;
     private final String name;
 
-    ModChannel(ChatColor color, String name)
-    {
+    ModChannel(ChatColor color, String name) {
         this.color = color;
         this.name = name;
     }
 
-    public ChatColor getColor()
-    {
+    public ChatColor getColor() {
         return this.color;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return this.name;
     }
 }

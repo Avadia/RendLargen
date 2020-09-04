@@ -26,108 +26,91 @@ import java.util.logging.Level;
  * You should have received a copy of the GNU General Public License
  * along with RendLargen.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class PaymentCheckerThread extends Thread
-{
+public class PaymentCheckerThread extends Thread {
     private final RendLargen rendLargen;
 
     private long lastTimestamp;
     private UUID lastUUID;
 
-    public PaymentCheckerThread(RendLargen rendLargen)
-    {
+    public PaymentCheckerThread(RendLargen rendLargen) {
         this.rendLargen = rendLargen;
 
         this.lastTimestamp = this.rendLargen.getConfiguration().get("last-timestamp").getAsLong();
 
         String lastUUIDConfiguration = this.rendLargen.getConfiguration().get("last-uuid").getAsString();
 
-        if(!lastUUIDConfiguration.equals(""))
+        if (!lastUUIDConfiguration.equals(""))
             this.lastUUID = UUID.fromString(this.rendLargen.getConfiguration().get("last-uuid").getAsString());
         else
             this.lastUUID = null;
     }
 
     @Override
-    public void run()
-    {
-        while(true)
-        {
+    public void run() {
+        while (true) {
             UUID lastPaymentsUUID = null;
             long lastPaymentsTimestamp = 0;
 
             JsonObject apiPaymentsResponse = null;
 
-            try
-            {
+            try {
                 apiPaymentsResponse = this.rendLargen.getBuycraftAPI().paymentsAction(120, null);
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            if(apiPaymentsResponse == null)
-            {
+            if (apiPaymentsResponse == null) {
                 this.rendLargen.log(Level.WARNING, "Can't ask Buycraft API, maybe a temporary error?");
 
-                try
-	            {
-	                Thread.sleep(5000);
-	            }
-	            catch (InterruptedException e)
-	            {
-	                e.printStackTrace();
-	            }
-	            
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
                 continue;
             }
 
             JsonArray lastPaymentsJson = apiPaymentsResponse.get("payload").getAsJsonArray();
 
-            for(int i = 0; i < lastPaymentsJson.size(); i++)
-            {
+            for (int i = 0; i < lastPaymentsJson.size(); i++) {
                 JsonObject paymentJson = lastPaymentsJson.get(i).getAsJsonObject();
 
                 long timestamp = paymentJson.get("time").getAsLong();
                 UUID uuid = UUID.fromString(UUIDUtils.addDashesToUUID(paymentJson.get("uuid").getAsString()));
 
-                if(this.lastTimestamp > timestamp || (this.lastTimestamp == timestamp && this.lastUUID != null && this.lastUUID.equals(uuid)))
+                if (this.lastTimestamp > timestamp || (this.lastTimestamp == timestamp && this.lastUUID != null && this.lastUUID.equals(uuid)))
                     continue;
 
                 JsonArray packagesJson = paymentJson.get("packages").getAsJsonArray();
                 ArrayList<Integer> packages = new ArrayList<>();
 
-                for(int j = 0; j < packagesJson.size(); j++)
+                for (int j = 0; j < packagesJson.size(); j++)
                     packages.add(packagesJson.get(j).getAsInt());
 
                 this.rendLargen.log(Level.INFO, "New payment detected for player " + uuid.toString() + " (" + StringUtils.join(packages, ", ") + ")!");
                 this.rendLargen.getPaymentManager().push(uuid);
 
-                if(lastPaymentsTimestamp < timestamp)
-                {
+                if (lastPaymentsTimestamp < timestamp) {
                     lastPaymentsTimestamp = timestamp;
 
-                    if(lastPaymentsUUID == null || !lastPaymentsUUID.equals(uuid))
+                    if (lastPaymentsUUID == null || !lastPaymentsUUID.equals(uuid))
                         lastPaymentsUUID = uuid;
                 }
             }
 
-            if(lastPaymentsTimestamp != 0 && lastPaymentsUUID != null)
+            if (lastPaymentsTimestamp != 0)
                 this.updateConfiguration(lastPaymentsTimestamp, lastPaymentsUUID);
 
-            try
-            {
+            try {
                 Thread.sleep(5000);
-            }
-            catch (InterruptedException e)
-            {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private void updateConfiguration(long timestamp, UUID uuid)
-    {
+    private void updateConfiguration(long timestamp, UUID uuid) {
         this.lastTimestamp = timestamp;
         this.lastUUID = uuid;
 

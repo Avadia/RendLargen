@@ -24,28 +24,20 @@ import java.util.concurrent.Executors;
  * You should have received a copy of the GNU General Public License
  * along with RendLargen.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class PaymentManager
-{
+public class PaymentManager {
     private final RendLargen rendLargen;
     private final ExecutorService executor;
 
-    private PriorityQueue<RestoreRank> rankRestorator;
+    private final PriorityQueue<RestoreRank> rankRestorator;
 
-    public PaymentManager(RendLargen rendLargen)
-    {
+    public PaymentManager(RendLargen rendLargen) {
         this.rendLargen = rendLargen;
         this.executor = Executors.newFixedThreadPool(1);
 
-        rankRestorator = new PriorityQueue<>(new Comparator<RestoreRank>() {
-            @Override
-            public int compare(RestoreRank o1, RestoreRank o2) {
-                return Long.compare(o1.getTimeToExec(), o2.getTimeToExec());
-            }
-        });
+        rankRestorator = new PriorityQueue<>(Comparator.comparingLong(RestoreRank::getTimeToExec));
     }
 
-    public void push(UUID uuid)
-    {
+    public void push(UUID uuid) {
         this.executor.submit(new PaymentApplicationTask(this.rendLargen, uuid));
     }
 

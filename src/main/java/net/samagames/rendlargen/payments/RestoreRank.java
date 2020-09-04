@@ -19,7 +19,6 @@ import java.util.UUID;
  * along with RendLargen.  If not, see <http://www.gnu.org/licenses/>.
  */
 public class RestoreRank {
-
     private long timeToExec;
     private UUID player;
     private long rankToRestore;

@@ -35,8 +35,7 @@ import java.util.logging.Level;
  * You should have received a copy of the GNU General Public License
  * along with RendLargen.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class RendLargen
-{
+public class RendLargen {
     private static RendLargen instance;
 
     private final SimpleDateFormat logDateFormat;
@@ -47,8 +46,7 @@ public class RendLargen
     private final boolean debug;
     private JsonObject configuration;
 
-    public RendLargen()
-    {
+    public RendLargen() {
         instance = this;
 
         this.logDateFormat = new SimpleDateFormat("[dd/MM/yyyy HH:mm:ss] ");
@@ -59,9 +57,13 @@ public class RendLargen
 
         this.buycraftAPI = new BuycraftAPI(this, this.configuration.get("buycraft-api-key").getAsString());
 
-        this.gameServiceManager = new GameServiceManager(this.configuration.get("sql-url").getAsString(),
-                this.configuration.get("sql-username").getAsString(),
-                this.configuration.get("sql-password").getAsString(), 1, 10);
+        String sqlIp = this.configuration.get("sql-ip").getAsString();
+        int sqlPort = this.configuration.get("sql-port").getAsInt();
+        String sqlName = this.configuration.get("sql-name").getAsString();
+        String sqlUsername = this.configuration.get("sql-user").getAsString();
+        String sqlPassword = this.configuration.get("sql-pass").getAsString();
+
+        this.gameServiceManager = new GameServiceManager(sqlIp, sqlUsername, sqlPassword, sqlName, sqlPort);
 
         JedisPoolConfig config = new JedisPoolConfig();
         config.setMaxTotal(-1);
@@ -80,109 +82,84 @@ public class RendLargen
         this.log(Level.INFO, "Waiting for payments...");
         new JsonModMessage("RendLargen", ModChannel.INFORMATION, ChatColor.GREEN, "Prêt !").send();
 
-        Runtime.getRuntime().addShutdownHook(new Thread()
-        {
-            @Override
-            public void run()
-            {
-                disable();
-            }
-        });
-
+        Runtime.getRuntime().addShutdownHook(new Thread(this::disable));
     }
 
-    public void disable()
-    {
+    public static RendLargen getInstance() {
+        return instance;
+    }
+
+    public void disable() {
         new JsonModMessage("RendLargen", ModChannel.INFORMATION, ChatColor.GREEN, "Arrêt ! Attention, le pont entre la boutique et le serveur ne sera plus effectué.").send();
     }
 
-    public void loadConfiguration()
-    {
+    public void loadConfiguration() {
         this.log(Level.INFO, "Loading configuration...");
 
         File configurationFile = new File("config.json");
 
-        if(!configurationFile.exists())
-        {
+        if (!configurationFile.exists()) {
             this.log(Level.SEVERE, "config.json not found!");
             System.exit(1);
         }
 
         JsonObject configurationJson = new JsonObject();
 
-        try
-        {
+        try {
             configurationJson = new JsonParser().parse(new FileReader(configurationFile)).getAsJsonObject();
-        }
-        catch (FileNotFoundException e)
-        {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
         this.configuration = configurationJson;
     }
 
-    public void updateConfiguration(long timestamp, UUID uuid)
-    {
+    public void updateConfiguration(long timestamp, UUID uuid) {
         this.configuration.remove("last-timestamp");
         this.configuration.addProperty("last-timestamp", timestamp);
 
         this.configuration.remove("last-uuid");
         this.configuration.addProperty("last-uuid", uuid.toString());
 
-        try
-        {
+        try {
             File configurationFile = new File("config.json");
             configurationFile.delete();
 
             FileWriter writer = new FileWriter(configurationFile);
             writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(this.configuration));
             writer.close();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             this.log(Level.SEVERE, "Can't update configuration file!");
         }
     }
 
-    public void log(Level level, String text)
-    {
-        if(level == Level.INFO)
+    public void log(Level level, String text) {
+        if (level == Level.INFO)
             System.out.println(this.logDateFormat.format(System.currentTimeMillis()) + "[INFO] " + text);
-        else if(level == Level.WARNING)
+        else if (level == Level.WARNING)
             System.out.println(this.logDateFormat.format(System.currentTimeMillis()) + "[WARNING] " + text);
-        else if(level == Level.SEVERE)
+        else if (level == Level.SEVERE)
             System.err.println(this.logDateFormat.format(System.currentTimeMillis()) + "[SEVERE] " + text);
     }
 
-    public JsonObject getConfiguration()
-    {
+    public JsonObject getConfiguration() {
         return this.configuration;
     }
 
-    public BuycraftAPI getBuycraftAPI()
-    {
+    public BuycraftAPI getBuycraftAPI() {
         return this.buycraftAPI;
     }
 
-    public Jedis getJedis()
-    {
+    public Jedis getJedis() {
         return this.jedisPool.getResource();
     }
 
-    public PaymentManager getPaymentManager()
-    {
+    public PaymentManager getPaymentManager() {
         return this.paymentManager;
     }
 
-    public boolean isDebug()
-    {
+    public boolean isDebug() {
         return this.debug;
-    }
-
-    public static RendLargen getInstance()
-    {
-        return instance;
     }
 
     public GameServiceManager getGameServiceManager() {

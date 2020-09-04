@@ -18,16 +18,12 @@ import java.util.UUID;
  * You should have received a copy of the GNU General Public License
  * along with RendLargen.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class UUIDUtils
-{
-    public static String addDashesToUUID(String s)
-    {
-        StringBuilder b = new StringBuilder();
-        return b.append(s, 0, 8).append('-').append(s, 8, 12).append('-').append(s, 12, 16).append('-').append(s, 16, 20).append('-').append(s, 20, 32).toString();
+public class UUIDUtils {
+    public static String addDashesToUUID(String s) {
+        return s.substring(0, 8) + '-' + s.substring(8, 12) + '-' + s.substring(12, 16) + '-' + s.substring(16, 20) + '-' + s.substring(20, 32);
     }
 
-    public static String uuidToString(UUID uuid)
-    {
+    public static String uuidToString(UUID uuid) {
         return uuid.toString().replaceAll("-", "");
     }
 }
