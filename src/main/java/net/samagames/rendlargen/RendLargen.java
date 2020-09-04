@@ -61,7 +61,7 @@ public class RendLargen {
         int sqlPort = this.configuration.get("sql-port").getAsInt();
         String sqlName = this.configuration.get("sql-name").getAsString();
         String sqlUsername = this.configuration.get("sql-user").getAsString();
-        String sqlPassword = this.configuration.get("sql-pass").getAsString();
+        String sqlPassword = this.configuration.get("sql-password").getAsString();
 
         this.gameServiceManager = new GameServiceManager(sqlIp, sqlUsername, sqlPassword, sqlName, sqlPort);
 
