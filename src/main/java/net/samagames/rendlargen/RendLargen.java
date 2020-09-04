@@ -83,6 +83,7 @@ public class RendLargen {
         new JsonModMessage("RendLargen", ModChannel.INFORMATION, ChatColor.GREEN, "Prêt !").send();
 
         Runtime.getRuntime().addShutdownHook(new Thread(this::disable));
+        this.log(Level.INFO, "RendLargen enabled!");
     }
 
     public static RendLargen getInstance() {
