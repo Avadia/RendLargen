@@ -22,16 +22,16 @@ public enum ModChannel {
     REPORT(ChatColor.GOLD, "Signalement"),
     INFORMATION(ChatColor.GREEN, "Information");
 
-    private final ChatColor color;
+    private final String color;
     private final String name;
 
     ModChannel(ChatColor color, String name) {
-        this.color = color;
+        this.color = color.name();
         this.name = name;
     }
 
     public ChatColor getColor() {
-        return this.color;
+        return ChatColor.valueOf(this.color);
     }
 
     public String getName() {
